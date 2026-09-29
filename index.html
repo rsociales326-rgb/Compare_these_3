@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparing 3 Things/Situations - English Exercise</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .drop-zone {
+            min-height: 180px;
+            transition: all 0.25s ease;
+        }
+
+        .drop-zone.drag-over {
+            background-color: #e0f2fe !important;
+            border-color: #0284c7 !important;
+            transform: scale(1.02);
+        }
+
+        .draggable-card {
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .draggable-card:active {
+            cursor: grabbing;
+        }
+
+        .draggable-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.95);
+        }
+
+        /* Click Selection for Mobile */
+        .draggable-card.selected-card {
+            outline: 3px solid #6366f1;
+            outline-offset: 2px;
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+            transform: translateY(-4px);
+        }
+
+        /* Success & Error State Styles */
+        .drop-zone.correct {
+            border-color: #22c55e !important;
+            background-color: #f0fdf4 !important;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+        }
+
+        .drop-zone.incorrect {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Custom Scrollbar */
+        .image-bank::-webkit-scrollbar {
+            height: 6px;
+        }
+        .image-bank::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen pb-16 text-slate-800">
+
+    <header class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-lg py-6 px-4 mb-8">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase mb-1.5">
+                    <i class="fa-solid fa-graduation-cap"></i> Teacher Verónica Hermida
+                </div>
+                <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight">COMPARING 3 THINGS / SITUATIONS</h1>
+                <p class="text-indigo-100 text-sm md:text-base mt-1">Drag and drop or tap each picture to place it in the correct box!</p>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20 shadow-inner">
+                <i class="fa-solid fa-trophy text-amber-300 text-3xl"></i>
+                <div>
+                    <span class="block text-xs uppercase text-indigo-100 font-semibold tracking-wider">Total Score</span>
+                    <span id="total-score" class="text-2xl font-black">0 / 4</span>
+                </div>
+                <button id="reset-all-btn" class="ml-3 bg-white text-indigo-700 hover:bg-indigo-50 font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-sm active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Reset All
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Exercise Container -->
+    <main class="max-w-5xl mx-auto px-4 space-y-10">
+
+        <section id="section-houses" class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-200/80 relative">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 border-b pb-4 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 font-extrabold flex items-center justify-center text-lg">1</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-house text-amber-500"></i> Houses
+                        </h2>
+                        <p class="text-xs text-slate-500">Adjectives: Cheap &bull; Cheaper &bull; The Cheapest</p>
+                    </div>
+                </div>
+                <div class="status-badge hidden px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"></div>
+            </div>
+
+            <!-- Image Bank -->
+            <div class="mb-6 bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300">
+                <span class="block text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer text-indigo-500"></i> Drag or tap pictures to select:
+                </span>
+                <div class="image-bank flex flex-wrap justify-center gap-4 min-h-[150px] items-center" data-bank-for="houses">
+                    <!-- Cheaper House -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="cheaper">
+                        <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=300&q=80" alt="Suburban family house" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">$120,000</span>
+                    </div>
+
+                    <!-- Cheap House -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="cheap">
+                        <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=300&q=80" alt="Luxury Villa Estate" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">$1,500,000</span>
+                    </div>
+
+                    <!-- The Cheapest House -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="cheapest">
+                        <img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=300&q=80" alt="Small rustic wooden hut" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">$5,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drop Table -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="cheap">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-amber-50 border border-amber-100 text-amber-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        CHEAP
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="cheaper">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-amber-50 border border-amber-100 text-amber-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        CHEAPER
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="cheapest">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-amber-50 border border-amber-100 text-amber-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        THE CHEAPEST
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button class="reset-section-btn text-xs font-semibold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition flex items-center gap-1.5" data-section="houses">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset
+                </button>
+                <button class="check-btn bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-2" data-section="houses">
+                    <i class="fa-solid fa-circle-check"></i> Check Answers
+                </button>
+            </div>
+        </section>
+
+        <section id="section-cars" class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-200/80 relative">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 border-b pb-4 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 font-extrabold flex items-center justify-center text-lg">2</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-car text-blue-500"></i> Cars
+                        </h2>
+                        <p class="text-xs text-slate-500">Adjectives: Fast &bull; Faster &bull; The Fastest</p>
+                    </div>
+                </div>
+                <div class="status-badge hidden px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"></div>
+            </div>
+
+            <!-- Image Bank -->
+            <div class="mb-6 bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300">
+                <span class="block text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer text-indigo-500"></i> Drag or tap pictures to select:
+                </span>
+                <div class="image-bank flex flex-wrap justify-center gap-4 min-h-[150px] items-center" data-bank-for="cars">
+                    <!-- The Fastest Car -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="fastest">
+                        <img src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=300&q=80" alt="Formula 1 Race Car" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">360 km/h</span>
+                    </div>
+
+                    <!-- Fast Car -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="fast">
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=300&q=80" alt="Agile Sports Sedan Car" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">180 km/h</span>
+                    </div>
+
+                    <!-- Faster Car -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="faster">
+                        <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=300&q=80" alt="Modern Supercar Coupe" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">280 km/h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drop Table -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="fast">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-blue-50 border border-blue-100 text-blue-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        FAST
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="faster">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-blue-50 border border-blue-100 text-blue-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        FASTER
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="fastest">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-blue-50 border border-blue-100 text-blue-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        THE FASTEST
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button class="reset-section-btn text-xs font-semibold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition flex items-center gap-1.5" data-section="cars">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset
+                </button>
+                <button class="check-btn bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-2" data-section="cars">
+                    <i class="fa-solid fa-circle-check"></i> Check Answers
+                </button>
+            </div>
+        </section>
+
+        <section id="section-phones" class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-200/80 relative">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 border-b pb-4 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 font-extrabold flex items-center justify-center text-lg">3</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-mobile-screen-button text-purple-500"></i> Mobile Phones
+                        </h2>
+                        <p class="text-xs text-slate-500">Adjectives: Expensive &bull; More Expensive &bull; The Most Expensive</p>
+                    </div>
+                </div>
+                <div class="status-badge hidden px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"></div>
+            </div>
+
+            <!-- Image Bank -->
+            <div class="mb-6 bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300">
+                <span class="block text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer text-indigo-500"></i> Drag or tap pictures to select:
+                </span>
+                <div class="image-bank flex flex-wrap justify-center gap-4 min-h-[150px] items-center" data-bank-for="phones">
+                    <!-- More Expensive Phone -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="more-expensive">
+                        <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=300&q=80" alt="High End Smartphone" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">$1,100</span>
+                    </div>
+
+                    <!-- The Most Expensive Phone -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="most-expensive">
+                        <img src="https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&w=300&q=80" alt="Gold Luxury Smartphone" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">$6,000</span>
+                    </div>
+
+                    <!-- Expensive Phone -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="expensive">
+                        <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=300&q=80" alt="Basic Smartphone" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">$250</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drop Table -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="expensive">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-purple-50 border border-purple-100 text-purple-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        EXPENSIVE
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="more-expensive">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-purple-50 border border-purple-100 text-purple-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        MORE EXPENSIVE
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="most-expensive">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-purple-50 border border-purple-100 text-purple-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        THE MOST EXPENSIVE
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button class="reset-section-btn text-xs font-semibold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition flex items-center gap-1.5" data-section="phones">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset
+                </button>
+                <button class="check-btn bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-2" data-section="phones">
+                    <i class="fa-solid fa-circle-check"></i> Check Answers
+                </button>
+            </div>
+        </section>
+
+        <section id="section-weather" class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-200/80 relative">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 border-b pb-4 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-cyan-100 text-cyan-600 font-extrabold flex items-center justify-center text-lg">4</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-showers-heavy text-cyan-500"></i> Weather
+                        </h2>
+                        <p class="text-xs text-slate-500">Adjectives: Bad &bull; Worse &bull; The Worst</p>
+                    </div>
+                </div>
+                <div class="status-badge hidden px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5"></div>
+            </div>
+
+            <!-- Image Bank -->
+            <div class="mb-6 bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300">
+                <span class="block text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer text-indigo-500"></i> Drag or tap pictures to select:
+                </span>
+                <div class="image-bank flex flex-wrap justify-center gap-4 min-h-[150px] items-center" data-bank-for="weather">
+                    <!-- Worse Weather (Strong Downpour / Heavy Rain) -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="worse">
+                        <img src="https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=300&q=80" alt="Heavy rainstorm pouring down" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">Heavy Rainstorm</span>
+                    </div>
+
+                    <!-- Bad Weather (Cloudy Rain droplets on glass) -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="bad">
+                        <img src="https://images.unsplash.com/photo-1534088568595-a066f410bcda?auto=format&fit=crop&w=300&q=80" alt="Cloudy day with mild rain" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">Cloudy & Rain</span>
+                    </div>
+
+                    <!-- The Worst Weather (Severe Tornado / Extreme Hurricane) -->
+                    <div class="draggable-card bg-white p-2 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition w-36 flex flex-col items-center" draggable="true" data-id="worst">
+                        <img src="https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=300&q=80" alt="Dangerous Tornado Storm" class="w-full h-24 object-cover rounded-xl pointer-events-none mb-2">
+                        <span class="text-xs font-bold text-slate-700">Extreme Tornado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drop Table -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="bad">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-cyan-50 border border-cyan-100 text-cyan-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        BAD
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="worse">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-cyan-50 border border-cyan-100 text-cyan-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        WORSE
+                    </div>
+                </div>
+
+                <div class="drop-target-wrapper flex flex-col items-center">
+                    <div class="drop-zone border-2 border-dashed border-slate-300 rounded-2xl w-full p-2 flex flex-col items-center justify-center bg-slate-50/50" data-accept="worst">
+                        <span class="placeholder-text text-slate-400 text-xs font-medium pointer-events-none">Drop picture here</span>
+                    </div>
+                    <div class="w-full bg-cyan-50 border border-cyan-100 text-cyan-800 font-extrabold py-2 px-4 rounded-xl text-center mt-2 text-sm uppercase tracking-wider">
+                        THE WORST
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button class="reset-section-btn text-xs font-semibold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition flex items-center gap-1.5" data-section="weather">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset
+                </button>
+                <button class="check-btn bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-sm px-6 py-2 rounded-xl shadow-md transition active:scale-95 flex items-center gap-2" data-section="weather">
+                    <i class="fa-solid fa-circle-check"></i> Check Answers
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let draggedElement = null;
+            let selectedElement = null; // For click-to-select interaction
+            
+            let sectionScores = {
+                houses: false,
+                cars: false,
+                phones: false,
+                weather: false
+            };
+
+            // Touch Dragging State Variables
+            let touchClone = null;
+            let touchCurrentZone = null;
+
+            const cards = document.querySelectorAll('.draggable-card');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const imageBanks = document.querySelectorAll('.image-bank');
+
+            // --- CLICK TO SELECT / PLACE SUPPORT (Great for Mobile & Accessibility) ---
+            cards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Ignore clicks triggered after dragging
+                    if (card.dataset.dragged === "true") return;
+
+                    if (selectedElement === card) {
+                        // Deselect if clicking the same card
+                        selectedElement.classList.remove('selected-card');
+                        selectedElement = null;
+                    } else {
+                        if (selectedElement) {
+                            selectedElement.classList.remove('selected-card');
+                        }
+                        selectedElement = card;
+                        selectedElement.classList.add('selected-card');
+                    }
+                });
+            });
+
+            // Target zone click listener for tap selection placement
+            dropZones.forEach(zone => {
+                zone.addEventListener('click', () => {
+                    if (selectedElement) {
+                        const cardSection = selectedElement.closest('section');
+                        const zoneSection = zone.closest('section');
+
+                        // Ensure card is placed in its matching section
+                        if (cardSection === zoneSection) {
+                            handleDrop(selectedElement, zone);
+                            selectedElement.classList.remove('selected-card');
+                            selectedElement = null;
+                        }
+                    }
+                });
+            });
+
+            // Image bank click listener to return selected card
+            imageBanks.forEach(bank => {
+                bank.addEventListener('click', (e) => {
+                    if (selectedElement && e.target === bank) {
+                        const cardSection = selectedElement.closest('section');
+                        const bankSection = bank.closest('section');
+
+                        if (cardSection === bankSection) {
+                            bank.appendChild(selectedElement);
+                            clearZoneValidation(bankSection);
+                            selectedElement.classList.remove('selected-card');
+                            selectedElement = null;
+                        }
+                    }
+                });
+            });
+
+            // --- MOUSE DRAG AND DROP HANDLERS ---
+            cards.forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    if (selectedElement) {
+                        selectedElement.classList.remove('selected-card');
+                        selectedElement = null;
+                    }
+                    draggedElement = card;
+                    card.dataset.dragged = "true";
+                    card.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', card.dataset.id);
+                });
+
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('dragging');
+                    setTimeout(() => { card.dataset.dragged = "false"; }, 100);
+                    draggedElement = null;
+                });
+
+                // Touch listener bindings
+                card.addEventListener('touchstart', handleTouchStart, { passive: false });
+                card.addEventListener('touchmove', handleTouchMove, { passive: false });
+                card.addEventListener('touchend', handleTouchEnd, { passive: false });
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    if (draggedElement) {
+                        const cardSection = draggedElement.closest('section');
+                        const zoneSection = zone.closest('section');
+                        if (cardSection === zoneSection) {
+                            handleDrop(draggedElement, zone);
+                        }
+                    }
+                });
+            });
+
+            imageBanks.forEach(bank => {
+                bank.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                bank.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedElement) {
+                        const cardSection = draggedElement.closest('section');
+                        const bankSection = bank.closest('section');
+                        if (cardSection === bankSection) {
+                            bank.appendChild(draggedElement);
+                            clearZoneValidation(bankSection);
+                        }
+                    }
+                });
+            });
+
+            function handleDrop(card, targetZone) {
+                const section = targetZone.closest('section');
+                const bank = section.querySelector('.image-bank');
+
+                // Return pre-existing card in zone back to bank
+                const existingCard = targetZone.querySelector('.draggable-card');
+                if (existingCard && existingCard !== card) {
+                    bank.appendChild(existingCard);
+                }
+
+                // Place new card into target zone
+                targetZone.appendChild(card);
+
+                // Hide placeholder text inside zone
+                const placeholder = targetZone.querySelector('.placeholder-text');
+                if (placeholder) placeholder.style.display = 'none';
+
+                // Reset validation status graphics on update
+                targetZone.classList.remove('correct', 'incorrect');
+                clearZoneValidation(section);
+            }
+
+            // --- TOUCH EVENT HANDLERS ---
+            function handleTouchStart(e) {
+                e.preventDefault();
+                draggedElement = this;
+
+                if (selectedElement) {
+                    selectedElement.classList.remove('selected-card');
+                    selectedElement = null;
+                }
+
+                const rect = this.getBoundingClientRect();
+                touchClone = this.cloneNode(true);
+                touchClone.style.position = 'fixed';
+                touchClone.style.left = `${rect.left}px`;
+                touchClone.style.top = `${rect.top}px`;
+                touchClone.style.width = `${rect.width}px`;
+                touchClone.style.opacity = '0.9';
+                touchClone.style.pointerEvents = 'none';
+                touchClone.style.zIndex = '1000';
+                touchClone.style.boxShadow = '0 12px 24px -6px rgba(0,0,0,0.25)';
+                document.body.appendChild(touchClone);
+
+                this.classList.add('opacity-40');
+            }
+
+            function handleTouchMove(e) {
+                if (!touchClone) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+
+                touchClone.style.left = `${touch.clientX - 50}px`;
+                touchClone.style.top = `${touch.clientY - 50}px`;
+
+                const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+                const zone = elementUnder ? elementUnder.closest('.drop-zone, .image-bank') : null;
+
+                if (touchCurrentZone !== zone) {
+                    if (touchCurrentZone && touchCurrentZone.classList.contains('drop-zone')) {
+                        touchCurrentZone.classList.remove('drag-over');
+                    }
+                    if (zone && zone.classList.contains('drop-zone')) {
+                        zone.classList.add('drag-over');
+                    }
+                    touchCurrentZone = zone;
+                }
+            }
+
+            function handleTouchEnd(e) {
+                if (!draggedElement) return;
+
+                if (touchClone) {
+                    touchClone.remove();
+                    touchClone = null;
+                }
+
+                draggedElement.classList.remove('opacity-40');
+
+                if (touchCurrentZone) {
+                    const cardSection = draggedElement.closest('section');
+                    const targetSection = touchCurrentZone.closest('section');
+
+                    if (cardSection === targetSection) {
+                        if (touchCurrentZone.classList.contains('drop-zone')) {
+                            touchCurrentZone.classList.remove('drag-over');
+                            handleDrop(draggedElement, touchCurrentZone);
+                        } else if (touchCurrentZone.classList.contains('image-bank')) {
+                            touchCurrentZone.appendChild(draggedElement);
+                            clearZoneValidation(cardSection);
+                        }
+                    }
+                }
+
+                touchCurrentZone = null;
+                draggedElement = null;
+            }
+
+            // --- ANSWER CHECKING & VERIFICATION ---
+            const checkButtons = document.querySelectorAll('.check-btn');
+            checkButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sectionId = btn.dataset.section;
+                    const section = document.getElementById(`section-${sectionId}`);
+                    verifySection(section, sectionId);
+                });
+            });
+
+            function verifySection(section, sectionId) {
+                const zones = section.querySelectorAll('.drop-zone');
+                let allFilled = true;
+                let allCorrect = true;
+
+                zones.forEach(zone => {
+                    const card = zone.querySelector('.draggable-card');
+                    const acceptedId = zone.dataset.accept;
+
+                    zone.classList.remove('correct', 'incorrect');
+
+                    if (!card) {
+                        allFilled = false;
+                        allCorrect = false;
+                        zone.classList.add('incorrect');
+                    } else if (card.dataset.id === acceptedId) {
+                        zone.classList.add('correct');
+                    } else {
+                        allCorrect = false;
+                        zone.classList.add('incorrect');
+                    }
+                });
+
+                const badge = section.querySelector('.status-badge');
+                badge.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-700', 'bg-rose-100', 'text-rose-700', 'bg-amber-100', 'text-amber-700');
+
+                if (!allFilled) {
+                    badge.classList.add('bg-amber-100', 'text-amber-800');
+                    badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Fill all 3 boxes!`;
+                    sectionScores[sectionId] = false;
+                } else if (allCorrect) {
+                    badge.classList.add('bg-emerald-100', 'text-emerald-800');
+                    badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Great job! All correct!`;
+                    sectionScores[sectionId] = true;
+                } else {
+                    badge.classList.add('bg-rose-100', 'text-rose-800');
+                    badge.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Some answers are wrong!`;
+                    sectionScores[sectionId] = false;
+                }
+
+                updateTotalScore();
+            }
+
+            function clearZoneValidation(section) {
+                if (!section) return;
+                const zones = section.querySelectorAll('.drop-zone');
+                zones.forEach(z => z.classList.remove('correct', 'incorrect'));
+                const badge = section.querySelector('.status-badge');
+                if (badge) badge.classList.add('hidden');
+            }
+
+            function updateTotalScore() {
+                const score = Object.values(sectionScores).filter(Boolean).length;
+                document.getElementById('total-score').innerText = `${score} / 4`;
+            }
+
+            // --- RESET CONTROLS ---
+            const resetSectionBtns = document.querySelectorAll('.reset-section-btn');
+            resetSectionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sectionId = btn.dataset.section;
+                    resetSection(sectionId);
+                });
+            });
+
+            document.getElementById('reset-all-btn').addEventListener('click', () => {
+                ['houses', 'cars', 'phones', 'weather'].forEach(resetSection);
+            });
+
+            function resetSection(sectionId) {
+                const section = document.getElementById(`section-${sectionId}`);
+                if (!section) return;
+
+                const bank = section.querySelector('.image-bank');
+                const zones = section.querySelectorAll('.drop-zone');
+
+                zones.forEach(zone => {
+                    const card = zone.querySelector('.draggable-card');
+                    if (card) {
+                        bank.appendChild(card);
+                    }
+                    zone.classList.remove('correct', 'incorrect', 'drag-over');
+                });
+
+                const badge = section.querySelector('.status-badge');
+                if (badge) badge.classList.add('hidden');
+
+                if (selectedElement && selectedElement.closest('section') === section) {
+                    selectedElement.classList.remove('selected-card');
+                    selectedElement = null;
+                }
+
+                sectionScores[sectionId] = false;
+                updateTotalScore();
+            }
+        });
+    </script>
+</body>
+</html>
